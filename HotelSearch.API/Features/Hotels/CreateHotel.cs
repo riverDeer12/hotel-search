@@ -3,6 +3,7 @@ using FluentValidation;
 using HotelSearch.API.Constants;
 using HotelSearch.API.Database;
 using HotelSearch.API.Database.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelSearch.API.Features.Hotels;
 
@@ -56,13 +57,21 @@ public sealed class CreateHotelEndpoint : Endpoint<CreateHotelRequest, HotelResp
 
 public sealed class CreateHotelValidator : Validator<CreateHotelRequest>
 {
-    public CreateHotelValidator()
+    public CreateHotelValidator(HotelSearchContext context)
     {
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithErrorCode(ErrorCodes.Required)
             .MaximumLength(200)
-            .WithErrorCode(ErrorCodes.NameTooLong);
+            .WithErrorCode(ErrorCodes.NameTooLong)
+            .MustAsync(async (name, cancellationToken) =>
+            {
+                var normalized = name.Trim();
+
+                return !await context.Hotels
+                    .AnyAsync(hotel => hotel.Name.ToLower() == normalized.ToLower(), cancellationToken);
+            })
+            .WithErrorCode(ErrorCodes.AlreadyExists);
 
         RuleFor(x => x.Price)
             .GreaterThan(0)

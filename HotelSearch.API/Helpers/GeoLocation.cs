@@ -1,8 +1,16 @@
 namespace HotelSearch.API.Helpers;
-public readonly record struct GeoLocation(double Latitude, double Longitude);
+
+public record GeoLocation(double Latitude, double Longitude);
 
 public static class GeoLocationExtensions
 {
+    
+    /// <summary>
+    /// Calculates the great-circle distance between two geographic coordinates using the Haversine formula.
+    /// </summary>
+    /// <param name="a">First location (latitude/longitude in decimal degrees).</param>
+    /// <param name="b">Second location (latitude/longitude in decimal degrees).</param>
+    /// <returns>Distance between the two locations in kilometers.</returns>
     public static double GetDistance(GeoLocation a, GeoLocation b)
     {
         const double R = 6371.0;

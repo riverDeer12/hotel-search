@@ -6,20 +6,16 @@ public class AdditionalRequestLogging
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<AdditionalRequestLogging> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AdditionalRequestLogging(RequestDelegate next, ILogger<AdditionalRequestLogging> logger,
-        IHttpContextAccessor httpContextAccessor)
+    public AdditionalRequestLogging(RequestDelegate next, ILogger<AdditionalRequestLogging> logger)
     {
         _next = next;
         _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-        _logger.LogInformation("Processing request from {@RequestUser}, at {@DateTimeUTC}",
-            context.User.Identity?.Name,
+        _logger.LogInformation("Processing request at {@DateTimeUTC}",
             DateTime.UtcNow
         );
 

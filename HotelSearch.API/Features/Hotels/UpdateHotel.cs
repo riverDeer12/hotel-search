@@ -39,11 +39,8 @@ public sealed class UpdateHotelEndpoint : Endpoint<UpdateHotelRequest, HotelResp
 
     public override async Task HandleAsync(UpdateHotelRequest request, CancellationToken cancellationToken)
     {
-        var hotelId = Route<Guid>("id", isRequired: true);
-
-        var hotel =
-            await _context.Hotels
-                .FirstOrDefaultAsync(x => x.Id == hotelId, cancellationToken: cancellationToken);
+        var hotel = await _context.Hotels
+            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (hotel is null)
             ThrowError(ErrorCodes.NotFound);
@@ -69,13 +66,22 @@ public sealed class UpdateHotelEndpoint : Endpoint<UpdateHotelRequest, HotelResp
 
 public sealed class UpdateHotelValidator : Validator<UpdateHotelRequest>
 {
-    public UpdateHotelValidator()
+    public UpdateHotelValidator(HotelSearchContext context)
     {
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithErrorCode(ErrorCodes.Required)
             .MaximumLength(200)
-            .WithErrorCode(ErrorCodes.NameTooLong);
+            .WithErrorCode(ErrorCodes.NameTooLong)
+            .MustAsync(async (request, name, ct) =>
+            {
+                var normalized = name.Trim();
+
+                return !await context.Hotels.AnyAsync(hotel =>
+                    hotel.Id != request.Id &&
+                    hotel.Name.ToLower() == normalized.ToLower(), ct);
+            })
+            .WithErrorCode(ErrorCodes.AlreadyExists);
 
         RuleFor(x => x.Price)
             .GreaterThan(0)
