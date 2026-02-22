@@ -26,7 +26,6 @@ public sealed class UpdateHotelEndpoint : Endpoint<UpdateHotelRequest, HotelResp
     public override void Configure()
     {
         Put("api/hotels/{id}");
-        AllowAnonymous();
         Options(x => x.WithTags("Hotels"));
         Summary(s =>
         {

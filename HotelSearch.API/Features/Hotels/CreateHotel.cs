@@ -22,7 +22,6 @@ public sealed class CreateHotelEndpoint : Endpoint<CreateHotelRequest, HotelResp
     public override void Configure()
     {
         Post("api/hotels");
-        AllowAnonymous();
         Options(x => x.WithTags("Hotels"));
         Summary(s =>
         {

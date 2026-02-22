@@ -16,7 +16,6 @@ public class GetHotelsEndpoint: EndpointWithoutRequest<List<HotelResponse>>
     public override void Configure()
     {
         Get("api/hotels");
-        AllowAnonymous();
         Options(x => x.WithTags("Hotels"));
         Summary(s =>
         {

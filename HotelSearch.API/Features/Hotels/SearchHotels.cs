@@ -37,7 +37,6 @@ public class SearchHotelsEndpoint : Endpoint<SearchHotelsRequest, PagedResponse<
     public override void Configure()
     {
         Get("/api/hotels/search");
-        AllowAnonymous();
         Options(x => x.WithTags("Hotels"));
         Summary(s =>
         {

@@ -17,7 +17,6 @@ public sealed class DeleteHotelEndpoint : EndpointWithoutRequest<HotelResponse>
     public override void Configure()
     {
         Delete("api/hotels/{id}");
-        AllowAnonymous();
         Options(x => x.WithTags("Hotels"));
         Summary(s =>
         {
