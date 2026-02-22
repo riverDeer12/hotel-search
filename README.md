@@ -106,3 +106,123 @@ public class SearchHotelsEndpoint : Endpoint<SearchRequest, SearchResponse>
     }
 }
 ```
+
+## Prerequisites
+
+- .NET 9 SDK installed  
+- Optional: EF Core CLI tools  
+
+Install EF Core CLI tools (if needed):
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+---
+
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/riverDeer12/hotel-search.git
+cd hotel-search
+```
+
+### 2. Restore Dependencies
+
+```bash
+dotnet restore
+```
+
+### 3. Run the Application
+
+```bash
+dotnet run --project ./HotelSearch.API/HotelSearch.API.csproj
+```
+
+The application will start locally and automatically create the `hotels.db` SQLite database file if it does not exist.
+
+---
+
+## API Documentation (Swagger)
+
+Swagger is available when running in the **Development** environment.
+
+Open in your browser:
+
+```
+https://localhost:<port>/swagger
+```
+
+If Swagger does not appear, ensure the environment is set to Development.
+
+### Windows (PowerShell)
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT="Development"
+dotnet run --project .\HotelSearch.API\HotelSearch.API.csproj
+```
+
+### macOS / Linux
+
+```bash
+export ASPNETCORE_ENVIRONMENT=Development
+dotnet run --project ./HotelSearch.API/HotelSearch.API.csproj
+```
+
+---
+
+## Database Configuration
+
+The connection string is defined in `appsettings.json`:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Data Source=hotels.db"
+}
+```
+
+The SQLite database file will be created in the project directory if it does not already exist.
+
+---
+
+## Entity Framework Commands
+
+Apply existing migrations:
+
+```bash
+dotnet ef database update --project ./HotelSearch.API/HotelSearch.API.csproj
+```
+
+Create a new migration:
+
+```bash
+dotnet ef migrations add InitialCreate --project ./HotelSearch.API/HotelSearch.API.csproj
+dotnet ef database update --project ./HotelSearch.API/HotelSearch.API.csproj
+```
+
+---
+
+## Logging
+
+Serilog is configured for structured logging.
+
+Logs are written to:
+
+- Console output
+- Rolling daily log files located at:
+
+```
+HotelSearch.API/Logs/log-*.txt
+```
+
+---
+
+## Testing
+
+Run tests using:
+
+```bash
+dotnet test
+```
