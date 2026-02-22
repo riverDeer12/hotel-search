@@ -18,9 +18,7 @@ The solution uses:
 - SQLite as a file-based database
 - Serilog for structured logging
 - Swagger (OpenAPI) for documentation
-
-The architecture is lightweight and suitable for local development, demos, and technical assessments.
-
+- 
 ---
 
 ## Tech Stack
@@ -35,18 +33,63 @@ The architecture is lightweight and suitable for local development, demos, and t
 ---
 
 ## Project Structure
-HotelSearch.sln
-│
-└───HotelSearch.API
-│ Program.cs
-│ appsettings.json
-│
-├───Database
-├───Entities
-├───Endpoints
-└───Logs
 
 ### Main Components
+
+---
+
+## Application Architecture
+
+The `HotelSearch.API` project follows a clean and minimal vertical-slice structure using FastEndpoints.
+
+The project is organized by responsibility:
+
+- **Endpoints** – API route definitions (FastEndpoints)
+- **Entities** – Domain models mapped to the database
+- **Database** – EF Core DbContext configuration
+- **Middleware (if present)** – Custom request pipeline logic
+- **Program.cs** – Application bootstrap and service registration
+
+This structure keeps each feature self-contained and avoids unnecessary layering.
+
+---
+
+## FastEndpoints Usage
+
+Instead of traditional Controllers, this project uses FastEndpoints.
+
+Each endpoint:
+
+- Inherits from `Endpoint<TRequest, TResponse>` (or similar base)
+- Defines route configuration inside `Configure()`
+- Implements business logic inside `HandleAsync()`
+
+Benefits of this approach:
+
+- Clear separation per feature
+- Reduced boilerplate
+- Better readability
+- Easier unit testing
+- Vertical slice architecture
+
+Example structure (conceptual):
+
+```csharp
+public class SearchHotelsEndpoint : Endpoint<SearchRequest, SearchResponse>
+{
+    public override void Configure()
+    {
+        Get("/hotels/search");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(SearchRequest req, CancellationToken ct)
+    {
+        // Business logic here
+    }
+}
+```
+
 
 Program.cs
 - Registers FastEndpoints
