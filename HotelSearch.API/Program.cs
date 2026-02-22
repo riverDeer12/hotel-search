@@ -8,6 +8,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors();
+
 builder.Services.AddFastEndpoints();
 
 builder.Services.SwaggerDocument(o =>
@@ -23,13 +24,17 @@ var configuration = builder.Configuration;
 
 builder.Services.AddDbContext<HotelSearchContext>(options =>
     options
-        .UseSqlite(configuration.GetConnectionString("DefaultConnection"))
-        .EnableSensitiveDataLogging());
+        .UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
 builder.Host.UseSerilog((context, config)
     => config.ReadFrom.Configuration(context.Configuration));
 
 var app = builder.Build();
+
+app.UseCors(corsPolicyBuilder => corsPolicyBuilder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
 app.UseFastEndpoints();
 
@@ -39,7 +44,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
+
 app.UseMiddleware<AdditionalRequestLogging>();
+
 app.UseHttpsRedirection();
 
 app.Run();

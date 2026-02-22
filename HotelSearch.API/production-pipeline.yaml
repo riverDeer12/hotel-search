@@ -1,0 +1,64 @@
+trigger:
+  - production
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  projectFile: 'HotelSearch.API/HotelSearch.API.csproj'
+  startupProject: 'HotelSearch.API'
+  outputSql: '$(Build.ArtifactStagingDirectory)\migrations.sql'
+  artifactName: 'drop_api_production'
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK 9.x'
+    inputs:
+      packageType: 'sdk'
+      version: '9.x'
+
+  - script: dotnet restore $(projectFile)
+    displayName: 'Restore'
+
+  - script: dotnet build $(projectFile) -c $(buildConfiguration) --no-restore
+    displayName: 'Build ($(buildConfiguration))'
+
+  # Runs all tests in the repo
+  - script: dotnet test -c $(buildConfiguration) --no-build
+    displayName: 'Test'
+
+  # EF Core CLI: install pinned version that matches EF Core packages (9.0.0)
+  - script: |
+      dotnet nuget locals all --clear
+      dotnet tool install -g dotnet-ef ^
+        --version 9.0.0 ^
+        --add-source https://api.nuget.org/v3/index.json ^
+        --ignore-failed-sources
+    displayName: 'Install dotnet-ef (9.0.0, global)'
+
+  - script: echo ##vso[task.prependpath]%USERPROFILE%\.dotnet\tools
+    displayName: 'Add dotnet-ef to PATH'
+
+  # Generate idempotent migration script (safe for production deployments)
+  - script: >
+      dotnet ef migrations script
+      --project $(projectFile)
+      --startup-project $(startupProject)
+      --configuration $(buildConfiguration)
+      --idempotent
+      --output "$(outputSql)"
+    displayName: 'Generate idempotent EF migration script'
+
+  - script: dotnet publish $(projectFile) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory) --no-build
+    displayName: 'Publish'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact'
+    inputs:
+      pathToPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: '$(artifactName)'
+      publishLocation: 'Container'

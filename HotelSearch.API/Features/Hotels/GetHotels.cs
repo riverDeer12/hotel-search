@@ -23,7 +23,6 @@ public class GetHotelsEndpoint: EndpointWithoutRequest<List<HotelResponse>>
             s.Summary = "Get all hotels";
             s.Description = "Returns a list of all hotels created through the CRUD API.";
         });
-
     }
 
     public override async Task HandleAsync(CancellationToken cancellationToken)
