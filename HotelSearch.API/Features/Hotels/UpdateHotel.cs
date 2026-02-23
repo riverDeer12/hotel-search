@@ -65,22 +65,22 @@ public sealed class UpdateHotelEndpoint : Endpoint<UpdateHotelRequest, HotelResp
 
 public sealed class UpdateHotelValidator : Validator<UpdateHotelRequest>
 {
-    public UpdateHotelValidator()
+    public UpdateHotelValidator(IDbContextFactory<HotelSearchContext> dbFactory)
     {
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithErrorCode(ErrorCodes.Required)
             .MaximumLength(200)
             .WithErrorCode(ErrorCodes.NameTooLong)
-            .MustAsync(async (request, name, ct) =>
+            .MustAsync(async (request, name, cancellationToken) =>
             {
-                var context = Resolve<HotelSearchContext>();
-                
                 var normalized = name.Trim();
+                
+                await using var context = await dbFactory.CreateDbContextAsync(cancellationToken);
 
                 return !await context.Hotels.AnyAsync(hotel =>
                     hotel.Id != request.Id &&
-                    hotel.Name.ToLower() == normalized.ToLower(), ct);
+                    hotel.Name.ToLower() == normalized.ToLower(), cancellationToken);
             })
             .WithErrorCode(ErrorCodes.AlreadyExists);
 

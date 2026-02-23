@@ -1,6 +1,7 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using HotelSearch.API.Database;
+using HotelSearch.API.Features.Hotels;
 using HotelSearch.API.Middlewares;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,9 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<HotelSearchContext>(options =>
     options
         .UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContextFactory<HotelSearchContext>(options =>
+    options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
 builder.Host.UseSerilog((context, config)
     => config.ReadFrom.Configuration(context.Configuration));

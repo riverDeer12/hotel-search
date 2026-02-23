@@ -1,16 +1,20 @@
+
 using HotelSearch.API.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HotelSearch.Tests;
 
 public static class TestDb
 {
-    public static HotelSearchContext CreateContext()
+    public static IDbContextFactory<HotelSearchContext> CreateInMemoryFactory(string dbName)
     {
-        var options = new DbContextOptionsBuilder<HotelSearchContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        var services = new ServiceCollection();
 
-        return new HotelSearchContext(options);
+        services.AddDbContextFactory<HotelSearchContext>(o =>
+            o.UseInMemoryDatabase(dbName));
+
+        var sp = services.BuildServiceProvider();
+        return sp.GetRequiredService<IDbContextFactory<HotelSearchContext>>();
     }
 }

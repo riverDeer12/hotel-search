@@ -56,21 +56,23 @@ public sealed class CreateHotelEndpoint : Endpoint<CreateHotelRequest, HotelResp
 
 public sealed class CreateHotelValidator : Validator<CreateHotelRequest>
 {
-    public CreateHotelValidator()
+    public CreateHotelValidator(IDbContextFactory<HotelSearchContext> dbFactory)
     {
         RuleFor(x => x.Name)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithErrorCode(ErrorCodes.Required)
             .MaximumLength(200)
             .WithErrorCode(ErrorCodes.NameTooLong)
             .MustAsync(async (name, cancellationToken) =>
             {
-                var context = Resolve<HotelSearchContext>();
-                    
                 var normalized = name.Trim();
 
-                return !await context.Hotels
-                    .AnyAsync(hotel => hotel.Name.ToLower() == normalized.ToLower(), cancellationToken);
+                await using var context = await dbFactory.CreateDbContextAsync(cancellationToken);
+
+                return !await context.Hotels.AnyAsync(
+                    hotel => hotel.Name.ToLower() == normalized.ToLower(),
+                    cancellationToken);
             })
             .WithErrorCode(ErrorCodes.AlreadyExists);
 

@@ -1,19 +1,26 @@
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using HotelSearch.API.Constants;
+using HotelSearch.API.Database;
 using HotelSearch.API.Database.Entities;
 using HotelSearch.API.Features.Hotels;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HotelSearch.Tests.Hotels;
 
 public class CreateHotelTests
 {
-     [Fact]
+
+
+    [Fact]
     public async Task Name_empty_fails_with_required()
     {
-        await using var database = TestDb.CreateContext();
+        var dbName = Guid.NewGuid().ToString();
         
-        var validator = new CreateHotelValidator();
+        var factory = TestDb.CreateInMemoryFactory(dbName);
+
+        var validator = new CreateHotelValidator(factory);
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("", 10m, 0, 0));
 
@@ -24,9 +31,11 @@ public class CreateHotelTests
     [Fact]
     public async Task Name_too_long_fails_with_nameTooLong()
     {
-        await using var database = TestDb.CreateContext();
+        var dbName = Guid.NewGuid().ToString();
         
-        var validator = new CreateHotelValidator();
+        var factory = TestDb.CreateInMemoryFactory(dbName);
+
+        var validator = new CreateHotelValidator(factory);
 
         var longName = new string('a', 201);
 
@@ -39,13 +48,18 @@ public class CreateHotelTests
     [Fact]
     public async Task Name_must_be_unique_case_insensitive_and_trimmed()
     {
-        await using var database = TestDb.CreateContext();
+        var dbName = Guid.NewGuid().ToString();
         
-        database.Hotels.Add(new Hotel { Name = "Hilton", Price = 10m, Latitude = 1, Longitude = 1 });
-        
-        await database.SaveChangesAsync();
+        var factory = TestDb.CreateInMemoryFactory(dbName);
 
-        var validator = new CreateHotelValidator();
+        // seed using a context created from the SAME factory
+        await using (var db = await factory.CreateDbContextAsync())
+        {
+            db.Hotels.Add(new Hotel { Name = "Hilton", Price = 10m, Latitude = 1, Longitude = 1 });
+            await db.SaveChangesAsync();
+        }
+
+        var validator = new CreateHotelValidator(factory);
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("  hiLToN  ", 10m, 0, 0));
 
@@ -58,9 +72,11 @@ public class CreateHotelTests
     [InlineData(-1)]
     public async Task Price_must_be_gt_0(decimal price)
     {
-        await using var database = TestDb.CreateContext();
+        var dbName = Guid.NewGuid().ToString();
         
-        var validator = new CreateHotelValidator();
+        var factory = TestDb.CreateInMemoryFactory(dbName);
+
+        var validator = new CreateHotelValidator(factory);
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("A", price, 0, 0));
 
@@ -73,8 +89,11 @@ public class CreateHotelTests
     [InlineData(91)]
     public async Task Latitude_out_of_range_fails(double lat)
     {
-       
-        var validator = new CreateHotelValidator();
+        var dbName = Guid.NewGuid().ToString();
+        
+        var factory = TestDb.CreateInMemoryFactory(dbName);
+
+        var validator = new CreateHotelValidator(factory);
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("A", 10m, lat, 0));
 
@@ -87,7 +106,11 @@ public class CreateHotelTests
     [InlineData(181)]
     public async Task Longitude_out_of_range_fails(double lng)
     {
-        var validator = new CreateHotelValidator();
+        var dbName = Guid.NewGuid().ToString();
+        
+        var factory = TestDb.CreateInMemoryFactory(dbName);
+
+        var validator = new CreateHotelValidator(factory);
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("A", 10m, 0, lng));
 
@@ -98,7 +121,11 @@ public class CreateHotelTests
     [Fact]
     public async Task Valid_request_passes()
     {
-        var validator = new CreateHotelValidator();
+        var dbName = Guid.NewGuid().ToString();
+        
+        var factory = TestDb.CreateInMemoryFactory(dbName);
+
+        var validator = new CreateHotelValidator(factory);
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("Hotel", 10m, 45, 16));
 
