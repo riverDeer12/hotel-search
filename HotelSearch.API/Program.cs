@@ -1,7 +1,6 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using HotelSearch.API.Database;
-using HotelSearch.API.Features.Hotels;
 using HotelSearch.API.Middlewares;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
