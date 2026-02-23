@@ -145,15 +145,48 @@ The application will start locally and automatically create the `hotels.db` SQLi
 
 ---
 
+## Authentication & Authorization
+
+The API uses a simple **API Key authentication mechanism**.
+
+Protected endpoints require a valid API key to be sent in the request header.
+
+### How It Works
+
+- Authentication scheme: `ApiKey`
+- Header name: `X-API-KEY`
+- Validation handled by a custom `ApiKeyAuthHandler`
+- Integrated with ASP.NET Core Authentication & Authorization middleware
+
+### How to Send the API Key
+
+Include the following header in your HTTP request: X-API-KEY: your_api_key_here
+
+### Example Using curl
+
+```bash
+curl -X POST https://localhost:5001/hotels \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: your_api_key_here" \
+  -d '{"name":"Hotel Test","price":100,"latitude":45,"longitude":16}'
+
+```
+
+### Swagger Authorization
+
+Open Swagger UI.
+
+Click Authorize.
+
+Enter your API key value.
+
+Swagger will automatically attach the X-API-KEY header to protected requests.
+
 ## API Documentation (Swagger)
 
 Swagger is available when running in the **Development** environment.
 
-Open in your browser:
-
-```
-https://localhost:<port>/swagger
-```
+Open in your browser: https://localhost:<port>/swagger
 
 If Swagger does not appear, ensure the environment is set to Development.
 
