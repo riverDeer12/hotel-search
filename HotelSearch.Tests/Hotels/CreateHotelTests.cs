@@ -13,7 +13,7 @@ public class CreateHotelTests
     {
         await using var database = TestDb.CreateContext();
         
-        var validator = new CreateHotelValidator(database);
+        var validator = new CreateHotelValidator();
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("", 10m, 0, 0));
 
@@ -26,7 +26,7 @@ public class CreateHotelTests
     {
         await using var database = TestDb.CreateContext();
         
-        var validator = new CreateHotelValidator(database);
+        var validator = new CreateHotelValidator();
 
         var longName = new string('a', 201);
 
@@ -45,7 +45,7 @@ public class CreateHotelTests
         
         await database.SaveChangesAsync();
 
-        var validator = new CreateHotelValidator(database);
+        var validator = new CreateHotelValidator();
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("  hiLToN  ", 10m, 0, 0));
 
@@ -60,7 +60,7 @@ public class CreateHotelTests
     {
         await using var database = TestDb.CreateContext();
         
-        var validator = new CreateHotelValidator(database);
+        var validator = new CreateHotelValidator();
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("A", price, 0, 0));
 
@@ -73,9 +73,8 @@ public class CreateHotelTests
     [InlineData(91)]
     public async Task Latitude_out_of_range_fails(double lat)
     {
-        await using var database = TestDb.CreateContext();
-        
-        var validator = new CreateHotelValidator(database);
+       
+        var validator = new CreateHotelValidator();
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("A", 10m, lat, 0));
 
@@ -88,9 +87,7 @@ public class CreateHotelTests
     [InlineData(181)]
     public async Task Longitude_out_of_range_fails(double lng)
     {
-        await using var database = TestDb.CreateContext();
-        
-        var validator = new CreateHotelValidator(database);
+        var validator = new CreateHotelValidator();
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("A", 10m, 0, lng));
 
@@ -101,9 +98,7 @@ public class CreateHotelTests
     [Fact]
     public async Task Valid_request_passes()
     {
-        await using var database = TestDb.CreateContext();
-        
-        var validator = new CreateHotelValidator(database);
+        var validator = new CreateHotelValidator();
 
         var response = await validator.TestValidateAsync(new CreateHotelRequest("Hotel", 10m, 45, 16));
 

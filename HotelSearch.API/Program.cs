@@ -2,6 +2,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using HotelSearch.API.Database;
 using HotelSearch.API.Middlewares;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using NSwag;
 using Serilog;
@@ -24,10 +25,20 @@ builder.Services.SwaggerDocument(o =>
             Type = OpenApiSecuritySchemeType.ApiKey,
             Name = "X-API-KEY",
             In = OpenApiSecurityApiKeyLocation.Header,
-            Description = "Enter API key to access protected (write) endpoints."
+            Description = "Enter API key to access protected endpoints."
         });
     };
 });
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = "ApiKey";
+        options.DefaultChallengeScheme = "ApiKey";
+    })
+    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthHandler>("ApiKey", _ => { });
+
+builder.Services.AddAuthorization();
 
 var configuration = builder.Configuration;
 
@@ -47,11 +58,13 @@ app.UseCors(corsPolicyBuilder => corsPolicyBuilder
 
 app.UseSerilogRequestLogging();
 
-app.UseMiddleware<ApiKeyMiddleware>();
-
 app.UseMiddleware<AdditionalRequestLogging>();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.UseFastEndpoints();
 

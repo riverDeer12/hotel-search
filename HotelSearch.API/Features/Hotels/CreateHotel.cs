@@ -56,7 +56,7 @@ public sealed class CreateHotelEndpoint : Endpoint<CreateHotelRequest, HotelResp
 
 public sealed class CreateHotelValidator : Validator<CreateHotelRequest>
 {
-    public CreateHotelValidator(HotelSearchContext context)
+    public CreateHotelValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -65,6 +65,8 @@ public sealed class CreateHotelValidator : Validator<CreateHotelRequest>
             .WithErrorCode(ErrorCodes.NameTooLong)
             .MustAsync(async (name, cancellationToken) =>
             {
+                var context = Resolve<HotelSearchContext>();
+                    
                 var normalized = name.Trim();
 
                 return !await context.Hotels

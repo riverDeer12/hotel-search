@@ -65,7 +65,7 @@ public sealed class UpdateHotelEndpoint : Endpoint<UpdateHotelRequest, HotelResp
 
 public sealed class UpdateHotelValidator : Validator<UpdateHotelRequest>
 {
-    public UpdateHotelValidator(HotelSearchContext context)
+    public UpdateHotelValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -74,6 +74,8 @@ public sealed class UpdateHotelValidator : Validator<UpdateHotelRequest>
             .WithErrorCode(ErrorCodes.NameTooLong)
             .MustAsync(async (request, name, ct) =>
             {
+                var context = Resolve<HotelSearchContext>();
+                
                 var normalized = name.Trim();
 
                 return !await context.Hotels.AnyAsync(hotel =>

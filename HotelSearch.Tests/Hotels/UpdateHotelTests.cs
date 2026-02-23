@@ -11,10 +11,7 @@ public class UpdateHotelTests
     [Fact]
     public async Task Name_empty_fails_with_required()
     {
-        await using var database = TestDb.CreateContext();
-
-        var validator = new UpdateHotelValidator(database);
-
+        var validator = new UpdateHotelValidator();
 
         var response = await validator.TestValidateAsync(new UpdateHotelRequest(Guid.NewGuid(), "", 10m, 0, 0));
 
@@ -34,7 +31,7 @@ public class UpdateHotelTests
 
         await database.SaveChangesAsync();
 
-        var validator = new UpdateHotelValidator(database);
+        var validator = new UpdateHotelValidator();
 
         // renaming B -> A should fail
         var bad = await validator.TestValidateAsync(new UpdateHotelRequest(b.Id, "A", 10m, 0, 0));
@@ -53,9 +50,7 @@ public class UpdateHotelTests
     [InlineData(-10)]
     public async Task Price_must_be_gt_0(decimal price)
     {
-        await using var database = TestDb.CreateContext();
-
-        var validator = new UpdateHotelValidator(database);
+        var validator = new UpdateHotelValidator();
 
         var response = await validator.TestValidateAsync(new UpdateHotelRequest(Guid.NewGuid(), "A", price, 0, 0));
 
@@ -66,9 +61,7 @@ public class UpdateHotelTests
     [Fact]
     public async Task Valid_request_passes()
     {
-        await using var database = TestDb.CreateContext();
-
-        var validator = new UpdateHotelValidator(database);
+        var validator = new UpdateHotelValidator();
 
         var response = await validator.TestValidateAsync(new UpdateHotelRequest(Guid.NewGuid(), "Hotel", 10m, 45, 16));
 
